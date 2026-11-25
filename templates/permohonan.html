@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Permohonan Informasi{% endblock %}
+{% block content %}
+<section class="halaman-judul">
+  <div class="wrap">
+    <h1>Permohonan Informasi Publik</h1>
+    <p>Ajukan permohonan informasi kepada {{ site.nama }}. Isi data dengan benar agar permohonan dapat diproses sesuai UU Keterbukaan Informasi Publik No. 14 Tahun 2008.</p>
+  </div>
+</section>
+
+<section class="bagian wrap" style="padding-top:36px">
+  <div class="form-grid">
+    <form method="post" action="{{ url_for('permohonan') }}" enctype="multipart/form-data" class="baris" novalidate>
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <div class="jebakan" aria-hidden="true"><label>Jangan diisi<input name="website" tabindex="-1" autocomplete="off"></label></div>
+
+      {% if galat %}
+      <div class="notif notif-galat" role="alert" style="margin:0">
+        <strong>Permohonan belum terkirim. Perbaiki hal berikut:</strong>
+        <ul style="margin:6px 0 0;padding-left:1.2em">{% for g in galat %}<li>{{ g }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+
+      <h2>1. Identitas pemohon</h2>
+      <p class="bantu" style="margin:-8px 0 0">Isi sesuai Kartu Tanda Penduduk (KTP). Kolom bertanda <span class="wajib">*</span> wajib diisi.</p>
+
+      <div><label for="kategori">Kategori pemohon <span class="wajib">*</span></label>
+        <select id="kategori" name="kategori" required>
+          <option value="">Pilih kategori</option>
+          {% for k in KAT_PEMOHON %}<option value="{{ k }}"{% if v.get('kategori') == k %} selected{% endif %}>{{ k }}</option>{% endfor %}
+        </select></div>
+      <div><label for="nama">Nama lengkap pemohon <span class="wajib">*</span></label>
+        <input id="nama" name="nama" required maxlength="120" autocomplete="name" value="{{ v.get('nama','') }}"></div>
+      <div class="baris baris-2">
+        <div><label for="nik">Nomor NIK (16 digit) <span class="wajib">*</span></label>
+          <input id="nik" name="nik" required inputmode="numeric" pattern="\d{16}" maxlength="16" value="{{ v.get('nik','') }}"></div>
+        <div><label for="pekerjaan">Pekerjaan</label>
+          <input id="pekerjaan" name="pekerjaan" maxlength="100" value="{{ v.get('pekerjaan','') }}"></div>
+      </div>
+      <div><label for="alamat">Alamat domisili lengkap <span class="wajib">*</span></label>
+        <textarea id="alamat" name="alamat" required maxlength="400" style="min-height:90px">{{ v.get('alamat','') }}</textarea></div>
+      <div class="baris baris-2">
+        <div><label for="email">Alamat email aktif <span class="wajib">*</span></label>
+          <input id="email" name="email" type="email" required maxlength="150" autocomplete="email" value="{{ v.get('email','') }}"></div>
+        <div><label for="hp">No. HP / WhatsApp <span class="wajib">*</span></label>
+          <input id="hp" name="hp" type="tel" required maxlength="20" autocomplete="tel" value="{{ v.get('hp','') }}"></div>
+      </div>
+      <div><label for="ktp">Unggah foto KTP <span class="wajib">*</span></label>
+        <input id="ktp" name="ktp" type="file" accept="image/jpeg,image/png" required>
+        <p class="bantu">Format JPG atau PNG, maksimal 1 MB. Pilih ulang berkas bila formulir dimuat ulang.</p></div>
+
+      <h2 style="margin-top:12px">2. Rincian permohonan informasi</h2>
+
+      <div><label for="bidang">Bidang yang dituju</label>
+        <select id="bidang" name="bidang">
+          <option value="">Tidak tahu / informasi umum</option>
+          {% for b in bidang %}<option value="{{ b }}"{% if v.get('bidang') == b %} selected{% endif %}>{{ b }}</option>{% endfor %}
+        </select>
+        <p class="bantu">Pilih bila informasi dikelola oleh bidang tertentu.</p></div>
+      <div><label for="rincian">Rincian informasi yang dibutuhkan <span class="wajib">*</span></label>
+        <textarea id="rincian" name="rincian" required maxlength="4000">{{ v.get('rincian','') }}</textarea>
+        <p class="bantu">Sebutkan jenis informasi, periode, dan wilayah (misalnya: APBDes Desa X tahun 2025).</p></div>
+
+      {% if ada_template %}
+      <div class="catatan">
+        <strong>Surat permohonan resmi (opsional)</strong><br>
+        Unduh format baku, isi, tanda tangani, lalu lampirkan kembali sebagai PDF di bawah.
+        <a href="{{ url_for('static', filename='files/' ~ file_template) }}" download>Unduh template</a>
+      </div>
+      {% endif %}
+      <div><label for="berkas">Lampiran berkas permohonan (PDF, opsional)</label>
+        <input id="berkas" name="berkas" type="file" accept="application/pdf">
+        <p class="bantu">Format PDF, maksimal 5 MB.</p></div>
+
+      <div><label for="tujuan">Tujuan penggunaan informasi <span class="wajib">*</span></label>
+        <textarea id="tujuan" name="tujuan" required maxlength="2000" style="min-height:100px">{{ v.get('tujuan','') }}</textarea></div>
+      <div><label for="cara">Cara memperoleh informasi <span class="wajib">*</span></label>
+        <select id="cara" name="cara" required>
+          <option value="">Pilih cara</option>
+          {% for c in CARA %}<option value="{{ c }}"{% if v.get('cara') == c %} selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select></div>
+
+      <label class="cek"><input type="checkbox" name="setuju" value="1" required{% if v.get('setuju') %} checked{% endif %}>
+        <span>Saya menyatakan bahwa seluruh data dan dokumen yang saya isikan adalah benar dan dapat dipertanggungjawabkan secara hukum.</span></label>
+      <div><button class="btn btn-padi" type="submit">Kirim permohonan</button></div>
+    </form>
+
+    <aside class="baris" style="align-content:start">
+      <div class="panel" style="margin:0">
+        <h3>Petunjuk pengisian</h3>
+        <ul class="misi">
+          <li>Isi NIK dan data diri sesuai KTP asli.</li>
+          <li>Jelaskan informasi yang dibutuhkan dan tujuannya secara spesifik.</li>
+          <li>Simpan nomor registrasi yang tampil setelah mengirim.</li>
+          <li>Jawaban diberikan paling lama 10 hari kerja sejak permohonan diterima.</li>
+        </ul>
+        <p style="margin:0"><a href="{{ url_for('status_permohonan') }}">Sudah mengirim? Cek status permohonan</a></p>
+      </div>
+      <div class="panel" style="margin:0">
+        <h3>Data pribadi Anda</h3>
+        <p class="kecil" style="margin:0">NIK dan foto KTP hanya dipakai untuk verifikasi permohonan dan hanya dapat dilihat oleh petugas PPID. Data tidak ditampilkan di halaman publik.</p>
+      </div>
+      <div class="panel" style="margin:0">
+        <h3>Butuh bantuan?</h3>
+        <p class="kecil" style="margin:0">Surel {{ site.ppid_kontak }}<br>Telepon {{ site.telepon }}<br>{{ site.jam }}</p>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

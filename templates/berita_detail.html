@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ b.judul }}{% endblock %}
+{% block content %}
+<section class="bagian wrap" style="padding-top:36px">
+  <div class="form-grid">
+    <article class="artikel">
+      <p class="kecil"><a href="{{ url_for('berita') }}">Berita</a> / <time datetime="{{ b.tanggal }}">{{ b.tanggal|tgl }}</time></p>
+      <h1 style="font-size:clamp(1.7rem,4vw,2.4rem)">{{ b.judul }}</h1>
+      {% if b.gambar %}<img src="{{ url_for('media', nama=b.gambar) }}" alt="{{ b.judul }}">{% endif %}
+      {{ b.isi|paragraf }}
+    </article>
+    <aside class="panel" style="margin:0">
+      <h3>Berita lainnya</h3>
+      {% if lain %}
+      <ul class="berita-lain">
+        {% for x in lain %}<li><a href="{{ url_for('berita_detail', i=x.id) }}">{{ x.judul }}</a><span class="kecil">{{ x.tanggal|tgl }}</span></li>{% endfor %}
+      </ul>
+      {% else %}<p class="kecil" style="margin:0">Belum ada berita lain.</p>{% endif %}
+      <p style="margin:12px 0 0"><a href="{{ url_for('berita') }}">Semua berita</a></p>
+    </aside>
+  </div>
+</section>
+{% endblock %}

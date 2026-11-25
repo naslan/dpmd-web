@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Berita{% endblock %}
+{% block content %}
+<section class="halaman-judul">
+  <div class="wrap">
+    <h1>Berita Terkini</h1>
+    <p>Kabar terbaru dari {{ site.nama }}.</p>
+  </div>
+</section>
+
+<section class="bagian wrap" style="padding-top:40px">
+  {% if berita %}
+  <div class="grid-berita">
+    {% for b in berita %}{% include "_kartu_berita.html" %}{% endfor %}
+  </div>
+  {% if jumlah_hal > 1 %}
+  <nav class="paging" aria-label="Halaman berita">
+    {% if hal > 1 %}<a class="btn btn-padi btn-kecil" href="{{ url_for('berita', hal=hal-1) }}">Sebelumnya</a>{% endif %}
+    <span class="kecil" style="align-self:center">Halaman {{ hal }} dari {{ jumlah_hal }}</span>
+    {% if hal < jumlah_hal %}<a class="btn btn-padi btn-kecil" href="{{ url_for('berita', hal=hal+1) }}">Berikutnya</a>{% endif %}
+  </nav>
+  {% endif %}
+  {% else %}
+  <div class="kosong"><strong>Belum ada berita.</strong>Berita akan tampil di sini setelah petugas menerbitkannya.</div>
+  {% endif %}
+</section>
+{% endblock %}

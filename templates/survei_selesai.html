@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Terima kasih{% endblock %}
+{% block content %}
+<section class="bagian wrap" style="padding-top:56px;max-width:720px">
+  <h1>Terima kasih</h1>
+  <p>Survei kepuasan Anda sudah kami terima. Masukan Anda sangat berarti untuk meningkatkan kualitas layanan {{ site.nama }}.</p>
+  <div class="aksi">
+    <a class="btn btn-padi" href="{{ url_for('home') }}">Kembali ke beranda</a>
+  </div>
+</section>
+{% endblock %}

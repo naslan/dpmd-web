@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Masuk petugas{% endblock %}
+{% block content %}
+<section class="wrap">
+  <form class="panel masuk baris" method="post" action="{{ url_for('admin_login') }}">
+    <h1 style="font-size:1.6rem">Masuk petugas</h1>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div><label for="username">Nama pengguna</label><input id="username" name="username" required autocomplete="username"></div>
+    <div><label for="password">Kata sandi</label><input id="password" name="password" type="password" required autocomplete="current-password"></div>
+    <div><button class="btn btn-padi" type="submit">Masuk</button></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Profil{% endblock %}
+{% block content %}
+{% macro simpul(n) %}
+<li>
+  <div class="simpul{% if n.kedalaman == 0 %} simpul-akar{% endif %}"><strong>{{ n.jabatan }}</strong>{% if n.nama %}<span>{{ n.nama }}</span>{% endif %}</div>
+  {% if n.anak %}<ul>{% for a in n.anak %}{{ simpul(a) }}{% endfor %}</ul>{% endif %}
+</li>
+{% endmacro %}
+<section class="halaman-judul">
+  <div class="wrap">
+    <h1>Profil</h1>
+    <p>Mengenal sambutan pimpinan, tugas, visi, misi, struktur organisasi, dan bidang kerja {{ site.nama }}.</p>
+  </div>
+</section>
+
+{% if kadis.nama or kadis.sambutan or kadis.foto %}
+<section class="bagian wrap" style="padding-top:40px">
+  <h2>Sambutan Kepala Dinas</h2>
+  <div class="sambutan">
+    <figure class="kadis-foto">
+      {% if kadis.foto %}
+      <img src="{{ url_for('media', nama=kadis.foto) }}" alt="Foto {{ kadis.nama or 'Kepala Dinas' }}">
+      {% else %}
+      <div class="tanpa-foto" aria-hidden="true"><svg viewBox="0 0 24 24" width="96" height="96" fill="currentColor"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-4.2 0-7.5 2.3-7.5 5.2V21h15v-1.8C19.5 16.3 16.2 14 12 14Z"/></svg></div>
+      {% endif %}
+      <figcaption>
+        {% if kadis.nama %}<strong>{{ kadis.nama }}</strong>{% endif %}
+        <span>{{ kadis.jabatan or ('Kepala ' ~ site.nama) }}</span>
+      </figcaption>
+    </figure>
+    <div class="panel sambutan-isi" style="margin:0">
+      {% if kadis.sambutan %}{{ kadis.sambutan|paragraf }}{% else %}<p class="kecil">Sambutan belum diisi.</p>{% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="bagian wrap"{% if not (kadis.nama or kadis.sambutan or kadis.foto) %} style="padding-top:40px"{% endif %}>
+  <h2>Tugas dan fungsi</h2>
+  <p style="max-width:70ch">{{ p.tugas }}</p>
+</section>
+
+<section class="bagian wrap">
+  <div class="dua-kolom">
+    <div>
+      <h2>Visi</h2>
+      <p class="visi">{{ p.visi }}</p>
+    </div>
+    <div>
+      <h2>Misi</h2>
+      <ul class="misi">
+        {% for m in p.misi %}<li>{{ m }}</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
+
+{% if bagan or pohon %}
+<section class="bagian wrap">
+  <h2>Struktur organisasi</h2>
+  {% if bagan %}
+  <figure class="bagan-gambar">
+    <a href="{{ url_for('media', nama=bagan) }}" target="_blank" rel="noopener"><img src="{{ url_for('media', nama=bagan) }}" alt="Bagan struktur organisasi {{ site.nama }}"></a>
+    <figcaption class="kecil">Klik gambar untuk memperbesar.</figcaption>
+  </figure>
+  {% endif %}
+  {% if pohon %}
+  {% if bagan %}<h3 style="margin-top:28px">Susunan jabatan</h3>{% endif %}
+  <div class="bagan" role="group" aria-label="Bagan susunan jabatan">
+    <ul>{% for r in pohon %}{{ simpul(r) }}{% endfor %}</ul>
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="bagian wrap">
+  <h2>Bidang kerja</h2>
+  <ul class="bidang">
+    {% for nama, uraian in p.bidang %}
+    <li><strong>{{ nama }}</strong><span>{{ uraian }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

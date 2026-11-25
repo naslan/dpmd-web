@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Ubah jabatan{% endblock %}
+{% block content %}
+<section class="bagian wrap" style="padding-top:32px;max-width:720px">
+  <p class="kecil"><a href="{{ url_for('admin', tab='profil') }}">Panel admin</a> / Ubah jabatan</p>
+  <form class="panel baris" method="post" action="{{ url_for('edit_struktur', i=n.id) }}">
+    <h2>Ubah jabatan</h2>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div><label for="jabatan">Nama jabatan</label><input id="jabatan" name="jabatan" required maxlength="160" value="{{ request.form.get('jabatan', n.jabatan) }}"></div>
+    <div><label for="nama">Nama pejabat (opsional)</label><input id="nama" name="nama" maxlength="120" value="{{ request.form.get('nama', n.nama) }}"></div>
+    <div><label for="induk_id">Atasan langsung</label>
+      <select id="induk_id" name="induk_id">
+        <option value="">(Tidak ada, jabatan tertinggi)</option>
+        {% for x in pilihan %}<option value="{{ x.id }}"{% if (request.form.get('induk_id') or n.induk_id|string) == x.id|string %} selected{% endif %}>{{ '\u2014 ' * x.kedalaman }}{{ x.jabatan }}</option>{% endfor %}
+      </select></div>
+    <div><label for="urutan">Urutan tampil (angka kecil tampil lebih dulu)</label><input id="urutan" name="urutan" inputmode="numeric" maxlength="3" value="{{ request.form.get('urutan', n.urutan) }}"></div>
+    <div class="aksi" style="margin:0">
+      <button class="btn btn-padi" type="submit">Simpan perubahan</button>
+      <a class="btn btn-padi" href="{{ url_for('admin', tab='profil') }}" style="background:transparent;color:var(--padi);border-color:var(--padi)">Batal</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

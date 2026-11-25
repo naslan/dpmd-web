@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Poster QR survei{% endblock %}
+{% block content %}
+<section class="wrap poster">
+  <img class="poster-logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo {{ site.singkatan }}">
+  <p class="poster-instansi">{{ site.nama }}</p>
+  <h1>Survei Kepuasan Masyarakat</h1>
+  <p class="poster-ajakan">Bantu kami melayani lebih baik. Pindai kode QR dengan kamera HP Anda.</p>
+  <img class="poster-qr" src="{{ url_for('survei_qr') }}" alt="Kode QR survei kepuasan masyarakat">
+  <p class="poster-url">{{ url }}</p>
+  <p class="noprint"><button class="btn btn-padi" type="button" onclick="window.print()">Cetak poster</button></p>
+</section>
+{% endblock %}

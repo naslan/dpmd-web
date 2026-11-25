@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+{% block title %}Panel admin{% endblock %}
+{% block content %}
+<section class="bagian wrap" style="padding-top:32px">
+  <div class="admin-bar">
+    <h1 style="font-size:1.8rem;margin:0">Panel admin</h1>
+    <form method="post" action="{{ url_for('admin_logout') }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <button class="btn btn-padi btn-kecil" type="submit">Keluar</button>
+    </form>
+  </div>
+
+  <nav class="tab" aria-label="Kelola">
+    <a href="{{ url_for('admin', tab='berita') }}"{% if tab == 'berita' %} class="aktif"{% endif %}>Berita<small>{{ data.berita|length }}</small></a>
+    <a href="{{ url_for('admin', tab='profil') }}"{% if tab == 'profil' %} class="aktif"{% endif %}>Profil</a>
+    <a href="{{ url_for('admin', tab='kutipan') }}"{% if tab == 'kutipan' %} class="aktif"{% endif %}>Kutipan<small>{{ data.kutipan|length }}</small></a>
+    <a href="{{ url_for('admin', tab='sosmed') }}"{% if tab == 'sosmed' %} class="aktif"{% endif %}>Media sosial</a>
+    <a href="{{ url_for('admin', tab='survei') }}"{% if tab == 'survei' %} class="aktif"{% endif %}>Survei</a>
+    <a href="{{ url_for('admin', tab='statistik') }}"{% if tab == 'statistik' %} class="aktif"{% endif %}>Statistik</a>
+    <a href="{{ url_for('admin', tab='permohonan') }}"{% if tab == 'permohonan' %} class="aktif"{% endif %}>Permohonan<small>{{ data.permohonan|length }}</small></a>
+    <a href="{{ url_for('admin', tab='dokumen') }}"{% if tab == 'dokumen' %} class="aktif"{% endif %}>Dokumen PPID<small>{{ data.dokumen|length }}</small></a>
+    <a href="{{ url_for('admin', tab='aplikasi') }}"{% if tab == 'aplikasi' %} class="aktif"{% endif %}>Aplikasi<small>{{ data.aplikasi|length }}</small></a>
+    <a href="{{ url_for('admin', tab='dokumentasi') }}"{% if tab == 'dokumentasi' %} class="aktif"{% endif %}>Dokumentasi<small>{{ data.dokumentasi|length }}</small></a>
+    <a href="{{ url_for('admin', tab='pesan') }}"{% if tab == 'pesan' %} class="aktif"{% endif %}>Pesan masuk<small>{{ data.pesan|length }}</small></a>
+  </nav>
+
+  {% macro hapus(rute, i, nama) %}
+    <form class="sebaris" method="post" action="{{ url_for(rute, i=i) }}" onsubmit="return confirm('Hapus {{ nama|e }}? Tindakan ini tidak dapat dibatalkan.')">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <button class="btn btn-bahaya btn-kecil" type="submit">Hapus</button>
+    </form>
+  {% endmacro %}
+
+  {% if tab == 'berita' %}
+  <form class="panel baris" method="post" action="{{ url_for('tambah_berita') }}" enctype="multipart/form-data">
+    <h2>Tulis berita baru</h2>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="baris baris-2">
+      <div><label for="judul">Judul berita</label><input id="judul" name="judul" required maxlength="200"></div>
+      <div><label for="tanggal">Tanggal</label><input id="tanggal" name="tanggal" type="date" value="{{ hari_ini }}"></div>
+    </div>
+    <div><label for="isi">Isi berita</label><textarea id="isi" name="isi" required style="min-height:200px"></textarea>
+      <p class="bantu">Pisahkan paragraf dengan satu baris kosong.</p></div>
+    <div><label for="gambar">Gambar (opsional; JPG, PNG, WebP; maks. 5 MB)</label>
+      <input id="gambar" name="gambar" type="file" accept="image/jpeg,image/png,image/webp"></div>
+    <div><button class="btn btn-padi" type="submit">Terbitkan berita</button></div>
+  </form>
+  {% if data.berita %}
+  <div class="tabel-bungkus"><table>
+    <thead><tr><th>Berita</th><th>Tanggal</th><th></th></tr></thead>
+    <tbody>{% for b in data.berita %}
+      <tr><td><span class="judul">{{ b.judul }}</span><span class="ket">{{ b.isi|ringkas(90) }}</span></td>
+      <td>{{ b.tanggal|tgl }}</td>
+      <td><a class="btn btn-padi btn-kecil" href="{{ url_for('berita_detail', i=b.id) }}" target="_blank" rel="noopener">Lihat</a>
+        <a class="btn btn-padi btn-kecil" href="{{ url_for('edit_berita', i=b.id) }}">Ubah</a>
+        {{ hapus('hapus_berita', b.id, b.judul) }}</td></tr>
+    {% endfor %}</tbody></table></div>
+  {% else %}<div class="kosong"><strong>Belum ada berita.</strong>Gunakan formulir di atas untuk menerbitkan berita pertama.</div>{% endif %}
+
+  {% elif tab == 'survei' %}
+  <div class="panel qr-admin">
+    <div class="qr-admin-gambar">
+      <img src="{{ url_for('survei_qr') }}" alt="Kode QR survei" width="180" height="180">
+    </div>
+    <div>
+      <h2>Kode QR survei</h2>
+      <p style="margin:0 0 8px">Alamat yang dibuka saat QR dipindai:<br><strong style="word-break:break-all">{{ sv.url }}</strong></p>
+      {% if sv.lokal %}
+      <p class="notif notif-galat" style="margin:0 0 12px">Alamat ini hanya bisa dibuka dari jaringan yang sama dengan komputer ini. Isi <strong>alamat website resmi</strong> di bawah sebelum QR dicetak.</p>
+      {% endif %}
+      <form method="post" action="{{ url_for('simpan_alamat_publik') }}" class="baris" style="margin-bottom:12px">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <div><label for="url_publik">Alamat website resmi (untuk kode QR)</label>
+          <input id="url_publik" name="url_publik" type="url" maxlength="200" placeholder="https://dpmd.contoh.go.id" value="{{ sv.url_publik }}"></div>
+        <div><button class="btn btn-padi btn-kecil" type="submit">Simpan alamat</button></div>
+      </form>
+      <p class="aksi" style="margin:0">
+        <a class="btn btn-padi btn-kecil" href="{{ url_for('survei_cetak') }}" target="_blank" rel="noopener">Cetak poster QR</a>
+        <a class="btn btn-padi btn-kecil" href="{{ url_for('survei_qr') }}" download="qr-survei.svg">Unduh QR (SVG)</a>
+        <a class="btn btn-padi btn-kecil" href="{{ url_for('survei') }}" target="_blank" rel="noopener">Buka halaman survei</a>
+      </p>
+    </div>
+  </div>
+
+  <form class="filter" method="get" action="{{ url_for('admin') }}">
+    <input type="hidden" name="tab" value="survei">
+    <label for="dari" style="margin:0;align-self:center">Dari</label><input id="dari" name="dari" type="date" value="{{ sv.dari }}" style="width:auto">
+    <label for="sampai" style="margin:0;align-self:center">Sampai</label><input id="sampai" name="sampai" type="date" value="{{ sv.sampai }}" style="width:auto">
+    <button class="btn btn-padi btn-kecil" type="submit">Terapkan</button>
+    <a class="btn btn-padi btn-kecil" href="{{ url_for('admin', tab='survei') }}" style="background:transparent;color:var(--padi);border-color:var(--padi)">Semua periode</a>
+    <a class="btn btn-padi btn-kecil" href="{{ url_for('unduh_survei', dari=sv.dari or None, sampai=sv.sampai or None) }}">Unduh data (CSV)</a>
+  </form>
+
+  {% if sv.n %}
+  <div class="statistik">
+    <div class="stat"><span class="angka">{{ '%.2f'|format(sv.ikm) }}</span><span>Indeks Kepuasan Masyarakat (skala 25-100)</span></div>
+    <div class="stat"><span class="angka">{{ sv.mutu[0] }}</span><span>Mutu pelayanan: {{ sv.mutu[1] }}</span></div>
+    <div class="stat"><span class="angka">{{ sv.n }}</span><span>Responden</span></div>
+  </div>
+
+  <div class="tabel-bungkus" style="margin-bottom:24px"><table>
+    <thead><tr><th>Unsur pelayanan</th><th>Rata-rata (1-4)</th><th>Nilai (25-100)</th><th style="width:30%">Grafik</th></tr></thead>
+    <tbody>{% for u in sv.unsur %}
+      <tr><td>{{ u.judul }}</td><td>{{ '%.2f'|format(u.rata) }}</td><td>{{ '%.2f'|format(u.ikm) }}</td>
+      <td><div class="batang" role="img" aria-label="{{ '%.0f'|format(u.rata / 4 * 100) }} persen"><i style="width:{{ '%.1f'|format(u.rata / 4 * 100) }}%"></i></div></td></tr>
+    {% endfor %}</tbody></table></div>
+
+  <h2>Saran dan masukan terbaru</h2>
+  {% if sv.saran %}
+  <div class="tabel-bungkus"><table>
+    <thead><tr><th>Masukan</th><th>Waktu</th><th></th></tr></thead>
+    <tbody>{% for x in sv.saran %}
+      <tr><td>{{ x.saran }}<span class="ket">{{ x.layanan }}</span></td><td>{{ x.created_at }}</td><td>{{ hapus('hapus_survei', x.id, 'tanggapan ini') }}</td></tr>
+    {% endfor %}</tbody></table></div>
+  <p class="bantu">Menghapus tanggapan juga menghapus penilaiannya dari perhitungan indeks. Gunakan hanya untuk spam.</p>
+  {% else %}<div class="kosong"><strong>Belum ada saran tertulis.</strong>Saran dari responden akan tampil di sini.</div>{% endif %}
+  {% else %}
+  <div class="kosong"><strong>Belum ada tanggapan survei{% if sv.dari or sv.sampai %} pada periode ini{% endif %}.</strong>Cetak atau bagikan kode QR di atas agar masyarakat dapat mengisi survei.</div>
+  {% endif %}
+
+  {% elif tab == 'statistik' %}
+  <div class="statistik">
+    <div class="stat"><span class="angka">{{ pengunjung.hari_ini|angka }}</span><span>Pengunjung hari ini</span></div>
+    <div class="stat"><span class="angka">{{ pengunjung.bulan_ini|angka }}</span><span>Pengunjung bulan ini</span></div>
+    <div class="stat"><span class="angka">{{ pengunjung.total|angka }}</span><span>Total pengunjung{% if pengunjung.awal %} (termasuk angka awal {{ pengunjung.awal|angka }}){% endif %}</span></div>
+  </div>
+  <div class="statistik">
+    <div class="stat"><span class="angka">{{ pengunjung.kemarin|angka }}</span><span>Pengunjung kemarin</span></div>
+    <div class="stat"><span class="angka">{{ pengunjung.tayangan_hari_ini|angka }}</span><span>Halaman dilihat hari ini</span></div>
+    <div class="stat"><span class="angka">{{ pengunjung.online|angka }}</span><span>Sedang online (5 menit terakhir)</span></div>
+  </div>
+
+  <h2>30 hari terakhir</h2>
+  {% set maks = [1] %}{% for h in st %}{% if h.pengunjung > maks[0] %}{% set _ = maks.pop() %}{% set _ = maks.append(h.pengunjung) %}{% endif %}{% endfor %}
+  <div class="tabel-bungkus" style="margin-bottom:24px"><table>
+    <thead><tr><th>Tanggal</th><th>Pengunjung</th><th>Halaman dilihat</th><th style="width:40%">Grafik</th></tr></thead>
+    <tbody>{% for h in st|reverse %}
+      <tr><td>{{ h.tanggal|tgl }}</td><td>{{ h.pengunjung|angka }}</td><td>{{ h.tayangan|angka }}</td>
+      <td><div class="batang" role="img" aria-label="{{ h.pengunjung }} pengunjung"><i style="width:{{ '%.1f'|format(h.pengunjung / maks[0] * 100) }}%"></i></div></td></tr>
+    {% endfor %}</tbody></table></div>
+
+  <form class="panel baris" method="post" action="{{ url_for('simpan_hitung_awal') }}" style="max-width:640px">
+    <h2>Angka awal penghitung</h2>
+    <p class="bantu" style="margin:-6px 0 0">Isi bila ingin melanjutkan hitungan dari website lama (mis. 125000). Angka ini ditambahkan ke total pengunjung.</p>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div><label for="hitung_awal">Angka awal</label>
+      <input id="hitung_awal" name="hitung_awal" inputmode="numeric" maxlength="15" value="{{ pengunjung.awal }}"></div>
+    <div><button class="btn btn-padi" type="submit">Simpan angka awal</button></div>
+  </form>
+  <p class="bantu">Cara menghitung: satu pengunjung dihitung sekali per hari, dikenali dari sidik (hash) alamat IP dan browser yang diacak setiap hari. Alamat IP dan cookie tidak disimpan. Kunjungan admin dan bot mesin pencari tidak dihitung.</p>
+
+  {% elif tab == 'profil' %}
+  <form class="panel baris" method="post" action="{{ url_for('simpan_kadis') }}" enctype="multipart/form-data">
+    <h2>Kepala dinas dan sambutan</h2>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="baris baris-2">
+      <div><label for="nama">Nama kepala dinas</label><input id="nama" name="nama" maxlength="120" value="{{ pf.nama }}"></div>
+      <div><label for="jabatan">Jabatan (opsional)</label><input id="jabatan" name="jabatan" maxlength="160" placeholder="Kepala {{ site.nama }}" value="{{ pf.jabatan }}"></div>
+    </div>
+    <div><label for="sambutan">Sambutan</label><textarea id="sambutan" name="sambutan" style="min-height:240px">{{ pf.sambutan }}</textarea>
+      <p class="bantu">Pisahkan paragraf dengan satu baris kosong.</p></div>
+    {% if pf.foto %}
+    <div><label>Foto saat ini</label>
+      <img src="{{ url_for('media', nama=pf.foto) }}" alt="" style="max-width:180px;border-radius:18px;border:1px solid var(--garis)">
+      <label class="cek" style="margin-top:8px"><input type="checkbox" name="hapus_foto" value="1"><span>Hapus foto ini</span></label></div>
+    {% endif %}
+    <div><label for="foto">{% if pf.foto %}Ganti foto{% else %}Foto kepala dinas{% endif %} (JPG, PNG, WebP; maks. 5 MB)</label>
+      <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp">
+      <p class="bantu">Disarankan foto berpose setengah badan, rasio tegak (4:5).</p></div>
+    <div><button class="btn btn-padi" type="submit">Simpan</button></div>
+  </form>
+
+  <form class="panel baris" method="post" action="{{ url_for('simpan_bagan') }}" enctype="multipart/form-data">
+    <h2>Gambar bagan struktur organisasi</h2>
+    <p class="bantu" style="margin:-6px 0 0">Opsional. Unggah bagan resmi dinas dalam bentuk gambar. Bila diisi, bagan ini tampil di halaman Profil di atas susunan jabatan.</p>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    {% if pf.bagan %}
+    <div><label>Bagan saat ini</label>
+      <img src="{{ url_for('media', nama=pf.bagan) }}" alt="" style="max-width:360px;border-radius:14px;border:1px solid var(--garis)">
+      <label class="cek" style="margin-top:8px"><input type="checkbox" name="hapus" value="1"><span>Hapus gambar bagan ini (centang lalu simpan)</span></label></div>
+    {% endif %}
+    <div><label for="gambar">{% if pf.bagan %}Ganti gambar{% else %}Gambar bagan{% endif %} (JPG, PNG, WebP; maks. 5 MB)</label>
+      <input id="gambar" name="gambar" type="file" accept="image/jpeg,image/png,image/webp"></div>
+    <div><button class="btn btn-padi" type="submit">Simpan gambar</button></div>
+  </form>
+
+  <form class="panel baris" method="post" action="{{ url_for('tambah_struktur') }}">
+    <h2>Susunan jabatan</h2>
+    <p class="bantu" style="margin:-6px 0 0">Bagan otomatis di halaman Profil dibuat dari daftar ini. Isi contoh bawaan perlu disesuaikan dengan struktur resmi dinas.</p>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="baris baris-2">
+      <div><label for="s_jabatan">Nama jabatan</label><input id="s_jabatan" name="jabatan" required maxlength="160" placeholder="Kepala Bidang Pemberdayaan Masyarakat"></div>
+      <div><label for="s_nama">Nama pejabat (opsional)</label><input id="s_nama" name="nama" maxlength="120"></div>
+    </div>
+    <div class="baris baris-2">
+      <div><label for="s_induk">Atasan langsung</label>
+        <select id="s_induk" name="induk_id">
+          <option value="">(Tidak ada, jabatan tertinggi)</option>
+          {% for n in pf.daftar %}<option value="{{ n.id }}">{{ '\u2014 ' * n.kedalaman }}{{ n.jabatan }}</option>{% endfor %}
+        </select></div>
+      <div><label for="s_urut">Urutan tampil</label><input id="s_urut" name="urutan" inputmode="numeric" maxlength="3" value="0"></div>
+    </div>
+    <div><button class="btn btn-padi" type="submit">Tambah jabatan</button></div>
+  </form>
+  {% if pf.daftar %}
+  <div class="tabel-bungkus"><table>
+    <thead><tr><th>Jabatan</th><th>Nama pejabat</th><th></th></tr></thead>
+    <tbody>{% for n in pf.daftar %}
+      <tr><td style="padding-left:{{ 16 + n.kedalaman * 22 }}px"><span class="judul">{{ n.jabatan }}</span></td><td>{{ n.nama or '-' }}</td>
+      <td><a class="btn btn-padi btn-kecil" href="{{ url_for('edit_struktur', i=n.id) }}">Ubah</a>
+        {{ hapus('hapus_struktur', n.id, n.jabatan) }}</td></tr>
+    {% endfor %}</tbody></table></div>
+  <p class="bantu">Menghapus sebuah jabatan memindahkan bawahannya ke atasan di atasnya.</p>
+  {% else %}<div class="kosong"><strong>Belum ada susunan jabatan.</strong>Tambahkan jabatan tertinggi (mis. Kepala Dinas) lebih dulu.</div>{% endif %}
+
+  {% elif tab == 'kutipan' %}
+  <form class="panel baris" method="post" action="{{ url_for('tambah_kutipan') }}">
+    <h2>Tambah kutipan</h2>
+    <p class="bantu" style="margin:-6px 0 0">Satu kutipan per baris. Untuk mencantumkan sumber, tambahkan garis tegak lalu nama, contoh: <em>Kerja keras hari ini adalah panen esok hari | Nama Tokoh</em>. Kutipan yang tampil di beranda berganti setiap hari secara bergilir.</p>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div><label for="kutipan">Kutipan</label><textarea id="kutipan" name="kutipan" required style="min-height:130px" maxlength="20000"></textarea></div>
+    <div><button class="btn btn-padi" type="submit">Tambahkan</button></div>
+  </form>
+  {% if data.kutipan %}
+  <div class="tabel-bungkus"><table>
+    <thead><tr><th>Kutipan</th><th>Sumber</th><th></th></tr></thead>
+    <tbody>{% for k in data.kutipan %}
+      <tr><td>{{ k.teks }}{% if kh and kh.id == k.id %} <span class="lencana lencana-selesai">Tampil hari ini</span>{% endif %}</td>
+      <td>{{ k.penulis or '-' }}</td><td>{{ hapus('hapus_kutipan', k.id, 'kutipan ini') }}</td></tr>
+    {% endfor %}</tbody></table></div>
+  {% else %}<div class="kosong"><strong>Belum ada kutipan.</strong>Kutipan harian tidak tampil di beranda sebelum ada isinya.</div>{% endif %}
+
+  {% elif tab == 'sosmed' %}
+  <form class="panel baris" method="post" action="{{ url_for('simpan_sosmed') }}" style="max-width:720px">
+    <h2>Tautan media sosial</h2>
+    <p class="bantu" style="margin:-6px 0 0">Isi dengan alamat lengkap profil (diawali https://). Kosongkan kolom untuk menyembunyikan ikonnya dari website.</p>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    {% for kunci, label, contoh in SOSMED %}
+    <div><label for="s_{{ kunci }}">{{ label }}</label>
+      <input id="s_{{ kunci }}" name="{{ kunci }}" type="url" maxlength="300" placeholder="{{ contoh }}" value="{{ data.sosmed.get(kunci, '') }}"></div>
+    {% endfor %}
+    <div><button class="btn btn-padi" type="submit">Simpan tautan</button></div>
+  </form>
+
+  {% elif tab == 'permohonan' %}
+  {% if data.permohonan %}
+  <div class="tabel-bungkus"><table>
+    <thead><tr><th>No. registrasi</th><th>Pemohon</th><th>Masuk</th><th>Status</th></tr></thead>
+    <tbody>{% for m in data.permohonan %}
+      <tr>
+        <td><strong>{{ m.no_reg }}</strong></td>
+        <td><span class="judul">{{ m.nama }}</span><span class="ket">{{ m.kategori }}</span></td>
+        <td>{{ m.created_at }}</td>
+        <td><span class="lencana lencana-{{ m.status|lower }}">{{ m.status }}</span>
+          <details class="rinci"><summary>Lihat detail</summary>
+            <dl class="info">
+              <dt>NIK</dt><dd>{{ m.nik }}</dd>
+              <dt>Pekerjaan</dt><dd>{{ m.pekerjaan or '-' }}</dd>
+              <dt>Alamat</dt><dd>{{ m.alamat }}</dd>
+              <dt>Email / HP</dt><dd>{{ m.email }} / {{ m.hp }}</dd>
+              <dt>Bidang dituju</dt><dd>{{ m.bidang or '-' }}</dd>
+              <dt>Informasi yang diminta</dt><dd>{{ m.rincian }}</dd>
+              <dt>Tujuan penggunaan</dt><dd>{{ m.tujuan }}</dd>
+              <dt>Cara memperoleh</dt><dd>{{ m.cara }}</dd>
+              <dt>Berkas</dt><dd><a href="{{ url_for('admin_berkas', i=m.id, jenis='ktp') }}" target="_blank" rel="noopener">Foto KTP</a>
+                {% if m.berkas_file %} | <a href="{{ url_for('admin_berkas', i=m.id, jenis='lampiran') }}" target="_blank" rel="noopener">Lampiran ({{ m.berkas_nama }})</a>{% endif %}</dd>
+            </dl>
+            <form method="post" action="{{ url_for('ubah_permohonan', i=m.id) }}" class="baris">
+              <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+              <div><label for="st{{ m.id }}">Status</label>
+                <select id="st{{ m.id }}" name="status">{% for s in STATUS %}<option{% if s == m.status %} selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+              <div><label for="ct{{ m.id }}">Catatan untuk pemohon (tampil di halaman cek status)</label>
+                <textarea id="ct{{ m.id }}" name="catatan" style="min-height:80px">{{ m.catatan }}</textarea></div>
+              <div><button class="btn btn-padi btn-kecil" type="submit">Simpan status</button></div>
+            </form>
+            <div style="margin-top:10px">{{ hapus('hapus_permohonan', m.id, 'permohonan ' ~ m.no_reg) }}</div>
+          </details></td>
+      </tr>
+    {% endfor %}</tbody></table></div>
+  {% else %}<div class="kosong"><strong>Belum ada permohonan informasi.</strong>Permohonan dari halaman PPID Pelaksana akan muncul di sini.</div>{% endif %}
+
+  {% elif tab == 'dokumen' %}
+  <form class="panel baris" method="post" action="{{ url_for('tambah_dokumen') }}" enctype="multipart/form-data">
+    <h2>Terbitkan dokumen baru</h2>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div><label for="judul">Judul dokumen</label><input id="judul" name="judul" required></div>
+    <div class="baris baris-2">
+      <div><label for="kategori">Kategori</label>
+        <select id="kategori" name="kategori" required>
+          {% for kode, nama in KATEGORI.items() %}<option value="{{ kode }}">{{ nama }}</option>{% endfor %}
+        </select></div>
+      <div><label for="tahun">Tahun</label><input id="tahun" name="tahun" type="number" min="2000" max="2100" value="{{ tahun_ini }}" required></div>
+    </div>
+    <div><label for="deskripsi">Uraian singkat (opsional)</label><input id="deskripsi" name="deskripsi"></div>
+    <div><label for="berkas">Berkas (PDF, Word, Excel, PowerPoint, CSV, ZIP; maks. 25 MB)</label><input id="berkas" name="berkas" type="file" required></div>
+    <div><button class="btn btn-padi" type="submit">Terbitkan dokumen</button></div>
+  </form>
+
+  {% if data.dokumen %}
+  <div class="tabel-bungkus"><table>
+    <thead><tr><th>Dokumen</th><th>Kategori</th><th>Tahun</th><th></th></tr></thead>
+    <tbody>{% for d in data.dokumen %}
+      <tr><td><span class="judul">{{ d.judul }}</span><span class="ket">{{ d.original_name }}, {{ d.ukuran|ukuran }}</span></td>
+      <td>{{ KATEGORI[d.kategori] }}</td><td>{{ d.tahun }}</td><td>{{ hapus('hapus_dokumen', d.id, d.judul) }}</td></tr>
+    {% endfor %}</tbody></table></div>
+  {% else %}<div class="kosong"><strong>Belum ada dokumen.</strong>Gunakan formulir di atas untuk menerbitkan dokumen pertama.</div>{% endif %}
+
+  {% elif tab == 'aplikasi' %}
+  <form class="panel baris" method="post" action="{{ url_for('tambah_aplikasi') }}">
+    <h2>Tambah aplikasi</h2>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div><label for="nama">Nama aplikasi</label><input id="nama" name="nama" required></div>
+    <div><label for="deskripsi">Deskripsi</label><input id="deskripsi" name="deskripsi"></div>
+    <div><label for="url">Tautan (diawali https://)</label><input id="url" name="url" type="url" placeholder="https://"></div>
+    <div><button class="btn btn-padi" type="submit">Tambah aplikasi</button></div>
+  </form>
+  {% if data.aplikasi %}
+  <div class="tabel-bungkus"><table>
+    <thead><tr><th>Aplikasi</th><th>Tautan</th><th></th></tr></thead>
+    <tbody>{% for a in data.aplikasi %}
+      <tr><td><span class="judul">{{ a.nama }}</span><span class="ket">{{ a.deskripsi }}</span></td>
+      <td>{{ a.url or 'Belum diisi' }}</td><td>{{ hapus('hapus_aplikasi', a.id, a.nama) }}</td></tr>
+    {% endfor %}</tbody></table></div>
+  {% else %}<div class="kosong"><strong>Belum ada aplikasi.</strong>Tambahkan aplikasi melalui formulir di atas.</div>{% endif %}
+
+  {% elif tab == 'dokumentasi' %}
+  <form class="panel baris" method="post" action="{{ url_for('tambah_dokumentasi') }}" enctype="multipart/form-data">
+    <h2>Unggah foto kegiatan</h2>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="baris baris-2">
+      <div><label for="judul">Judul kegiatan</label><input id="judul" name="judul" required></div>
+      <div><label for="tanggal">Tanggal</label><input id="tanggal" name="tanggal" type="date"></div>
+    </div>
+    <div><label for="keterangan">Keterangan (opsional)</label><input id="keterangan" name="keterangan"></div>
+    <div><label for="foto">Foto (JPG, PNG, WebP; maks. 25 MB)</label><input id="foto" name="foto" type="file" accept="image/*" required></div>
+    <div><button class="btn btn-padi" type="submit">Unggah foto</button></div>
+  </form>
+  {% if data.dokumentasi %}
+  <div class="galeri">{% for f in data.dokumentasi %}
+    <figure class="foto"><img src="{{ url_for('media', nama=f.filename) }}" alt="{{ f.judul }}" loading="lazy">
+      <figcaption><strong>{{ f.judul }}</strong><span>{{ f.tanggal|tgl }}</span><div style="margin-top:8px">{{ hapus('hapus_dokumentasi', f.id, f.judul) }}</div></figcaption></figure>
+  {% endfor %}</div>
+  {% else %}<div class="kosong"><strong>Belum ada foto.</strong>Unggah foto kegiatan pertama melalui formulir di atas.</div>{% endif %}
+
+  {% else %}
+  {% if data.pesan %}
+  <div class="tabel-bungkus"><table>
+    <thead><tr><th>Pengirim</th><th>Pesan</th><th>Masuk</th><th></th></tr></thead>
+    <tbody>{% for m in data.pesan %}
+      <tr><td><span class="judul">{{ m.nama }}</span><span class="ket">{{ m.email }}</span></td>
+      <td>{% if m.subjek %}<strong>{{ m.subjek }}</strong><br>{% endif %}{{ m.isi }}</td>
+      <td>{{ m.created_at }}</td><td>{{ hapus('hapus_pesan', m.id, 'pesan ini') }}</td></tr>
+    {% endfor %}</tbody></table></div>
+  {% else %}<div class="kosong"><strong>Belum ada pesan masuk.</strong>Pesan dari formulir Kontak akan muncul di sini.</div>{% endif %}
+  {% endif %}
+</section>
+{% endblock %}

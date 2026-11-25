@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Beranda{% endblock %} | {{ site.singkatan }} {{ site.daerah }}</title>
+  <meta name="description" content="Situs resmi {{ site.nama }}: profil, informasi publik PPID, aplikasi layanan, dan dokumentasi kegiatan.">
+  <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% set menu = [("home","HOME"),("profil","PROFIL"),("ppid","PPID PELAKSANA"),("aplikasi","APLIKASI"),("dokumentasi","DOKUMENTASI"),("kontak","KONTAK")] %}
+<a class="lompat" href="#isi">Lompat ke konten</a>
+<div class="tenun" aria-hidden="true"></div>
+<header class="kepala">
+  <div class="wrap kepala-isi">
+    <a class="merek" href="{{ url_for('home') }}">
+      <img class="logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo {{ site.singkatan }}">
+      <span class="merek-teks"><strong>{{ site.nama }}</strong><small>{{ site.daerah }}</small></span>
+    </a>
+    <button class="tombol-menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav id="nav" class="nav" aria-label="Menu utama">
+      {% for ep, label in menu %}
+        <a href="{{ url_for(ep) }}"{% if request.endpoint == ep %} class="aktif" aria-current="page"{% endif %}>{{ label }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+</header>
+
+<main id="isi">
+  {% with pesan = get_flashed_messages(with_categories=true) %}
+    {% if pesan %}
+      <div class="wrap">
+        {% for kat, teks in pesan %}<p class="notif notif-{{ kat }}" role="status">{{ teks }}</p>{% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="kaki">
+  <div class="tenun" aria-hidden="true"></div>
+  <div class="wrap kaki-isi">
+    <div>
+      <h2>{{ site.nama }}</h2>
+      <p>{{ site.daerah }}</p>
+      <p>{{ site.alamat }}</p>
+    </div>
+    <div>
+      <h2>Layanan</h2>
+      <p>{{ site.jam }}</p>
+      <p>Telepon {{ site.telepon }}<br>Surel {{ site.email }}</p>
+    </div>
+    <div>
+      <h2>Tautan</h2>
+      <p><a href="{{ url_for('ppid') }}">Informasi publik (PPID)</a></p>
+      <p><a href="{{ url_for('berita') }}">Berita terkini</a></p>
+      <p><a href="{{ url_for('survei') }}">Survei kepuasan masyarakat</a></p>
+      <p><a href="{{ url_for('aplikasi') }}">Aplikasi layanan</a></p>
+      <p><a href="{{ url_for('admin') }}">Masuk petugas</a></p>
+      {% if sosmed %}<h2 style="margin-top:18px">Media sosial</h2>{% include "_sosmed.html" %}{% endif %}
+    </div>
+  </div>
+  <div class="wrap hitung" aria-label="Statistik pengunjung">
+    <div class="hitung-total">
+      <h2>Total pengunjung</h2>
+      <p class="digit-baris" aria-hidden="true">{% for d in pengunjung.digit %}<span class="digit">{{ d }}</span>{% endfor %}</p>
+      <span class="sr-only">{{ pengunjung.total|angka }} pengunjung</span>
+    </div>
+    <dl class="hitung-daftar">
+      <div><dt>Hari ini</dt><dd>{{ pengunjung.hari_ini|angka }}</dd></div>
+      <div><dt>Kemarin</dt><dd>{{ pengunjung.kemarin|angka }}</dd></div>
+      <div><dt>Bulan ini</dt><dd>{{ pengunjung.bulan_ini|angka }}</dd></div>
+      <div><dt>Sedang online</dt><dd>{{ pengunjung.online|angka }}</dd></div>
+    </dl>
+  </div>
+  <p class="hak wrap">&copy; {{ tahun_ini }} {{ site.nama }}. Hak cipta dilindungi.</p>
+</footer>
+
+<script>
+  (function () {
+    var t = document.querySelector('.tombol-menu'), n = document.getElementById('nav');
+    t.addEventListener('click', function () {
+      var buka = n.classList.toggle('buka');
+      t.setAttribute('aria-expanded', buka);
+    });
+  })();
+</script>
+</body>
+</html>

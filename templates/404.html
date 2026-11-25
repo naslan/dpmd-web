@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Halaman tidak ditemukan{% endblock %}
+{% block content %}
+<section class="bagian wrap" style="padding-top:56px">
+  <h1>Halaman tidak ditemukan</h1>
+  <p>Alamat yang Anda buka tidak tersedia atau sudah dipindahkan.</p>
+  <p><a class="btn btn-padi" href="{{ url_for('home') }}">Kembali ke beranda</a></p>
+</section>
+{% endblock %}

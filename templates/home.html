@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Beranda{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="hero-merek">
+        <div class="hero-logos">
+          {% if logo_provinsi %}<img class="hero-logo-provinsi" src="{{ url_for('static', filename=logo_provinsi) }}" alt="Logo {{ site.daerah }}">{% endif %}
+          <img class="hero-logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo {{ site.nama }}">
+        </div>
+        <div>
+          <p class="hero-daerah">{{ site.daerah }}</p>
+          <p class="hero-nama">{{ site.nama }}</p>
+        </div>
+      </div>
+      <h1>Desa Kuat,<br>Masyarakat Berdaya.</h1>
+      <p class="lead">{{ site.nama }} Provinsi Sulawesi Selatan Mendampingi Pemerintah Desa dan Masyarakat Dalam Perencanaan, Pengelolaan Keuangan, dan Pemberdayaan Masyarakat di Seluruh Wilayah Provinsi Sulawesi Selatan.</p>
+      <div class="aksi">
+        <a class="btn btn-kunyit" href="{{ url_for('ppid') }}">Lihat informasi publik</a>
+        <a class="btn btn-garis" href="{{ url_for('profil') }}">Kenali dinas kami</a>
+      </div>
+    </div>
+    <form class="cari" action="{{ url_for('ppid') }}" method="get" role="search">
+      <label for="q">Cari dokumen publik</label>
+      <input id="q" name="q" type="search" placeholder="Contoh: laporan keuangan 2025">
+      <button class="btn btn-kunyit" type="submit">Cari dokumen</button>
+      <p class="kecil">{{ jumlah }} dokumen tersedia di PPID Pelaksana.</p>
+    </form>
+  </div>
+</section>
+<div class="tenun tenun-besar" aria-hidden="true"></div>
+
+{% if kutipan %}
+<section class="bagian wrap" style="padding-bottom:36px">
+  <figure class="kutipan">
+    <span class="kutipan-label">Kutipan hari ini</span>
+    <blockquote>{{ kutipan.teks }}</blockquote>
+    {% if kutipan.penulis %}<figcaption>{{ kutipan.penulis }}</figcaption>{% endif %}
+  </figure>
+</section>
+{% endif %}
+
+<section class="bagian wrap">
+  <div class="bagian-judul">
+    <h2>Berita terkini</h2>
+    <a href="{{ url_for('berita') }}">Semua berita</a>
+  </div>
+  {% if berita %}
+  <div class="grid-berita">
+    {% for b in berita %}{% include "_kartu_berita.html" %}{% endfor %}
+  </div>
+  {% else %}
+  <div class="kosong"><strong>Belum ada berita.</strong>Berita akan tampil di sini setelah petugas menerbitkannya.</div>
+  {% endif %}
+</section>
+
+<section class="bagian wrap">
+  <div class="bagian-judul"><h2>Layanan kami</h2></div>
+  <ul class="layanan">
+    <li><a href="{{ url_for('ppid') }}"><strong>PPID Pelaksana</strong><span>Unduh informasi berkala, serta merta, dan setiap saat, serta ajukan permohonan informasi.</span></a></li>
+    <li><a href="{{ url_for('aplikasi') }}"><strong>Aplikasi</strong><span>Akses aplikasi pendukung tata kelola desa dalam satu halaman.</span></a></li>
+    <li><a href="{{ url_for('dokumentasi') }}"><strong>Dokumentasi</strong><span>Foto kegiatan pembinaan, pelatihan, dan kunjungan ke desa.</span></a></li>
+    <li><a href="{{ url_for('kontak') }}"><strong>Kontak</strong><span>Sampaikan pertanyaan atau pengaduan langsung kepada petugas.</span></a></li>
+  </ul>
+</section>
+
+<section class="bagian wrap">
+  <div class="survei-band">
+    <div>
+      <h2>Survei Kepuasan Masyarakat</h2>
+      <p>Bantu kami melayani lebih baik. Isi survei singkat tentang layanan {{ site.singkatan }}; hanya sekitar 2 menit dan tanpa identitas pribadi.</p>
+      <a class="btn btn-kunyit" href="{{ url_for('survei') }}">Isi survei sekarang</a>
+    </div>
+    <figure class="qr-kotak">
+      <img src="{{ url_for('survei_qr') }}" alt="Kode QR survei kepuasan masyarakat" width="150" height="150">
+      <figcaption>Pindai dengan kamera HP</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="bagian wrap">
+  <div class="bagian-judul">
+    <h2>Informasi publik terbaru</h2>
+    <a href="{{ url_for('ppid') }}">Semua dokumen</a>
+  </div>
+  {% if dokumen %}
+  <div class="tabel-bungkus">
+    <table>
+      <thead><tr><th>Dokumen</th><th>Kategori</th><th>Tahun</th><th>Berkas</th></tr></thead>
+      <tbody>
+      {% for d in dokumen %}
+        <tr>
+          <td><span class="judul">{{ d.judul }}</span></td>
+          <td><span class="lencana">{{ KATEGORI[d.kategori] }}</span></td>
+          <td>{{ d.tahun }}</td>
+          <td><a href="{{ url_for('unduh', doc_id=d.id) }}">Unduh ({{ d.ukuran|ukuran }})</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="kosong"><strong>Belum ada dokumen yang diterbitkan.</strong>Petugas dapat menambahkan dokumen melalui halaman admin.</div>
+  {% endif %}
+</section>
+
+<section class="bagian wrap">
+  <div class="bagian-judul">
+    <h2>Kegiatan terbaru</h2>
+    <a href="{{ url_for('dokumentasi') }}">Semua dokumentasi</a>
+  </div>
+  {% if foto %}
+  <div class="galeri">
+    {% for f in foto %}
+    <figure class="foto">
+      <a href="{{ url_for('media', nama=f.filename) }}" target="_blank" rel="noopener"><img src="{{ url_for('media', nama=f.filename) }}" alt="{{ f.judul }}" loading="lazy"></a>
+      <figcaption><strong>{{ f.judul }}</strong><span>{{ f.tanggal|tgl }}</span></figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="kosong"><strong>Belum ada foto kegiatan.</strong>Foto akan tampil di sini setelah petugas mengunggahnya.</div>
+  {% endif %}
+</section>
+{% endblock %}

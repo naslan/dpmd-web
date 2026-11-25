@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Cek status permohonan{% endblock %}
+{% block content %}
+<section class="halaman-judul">
+  <div class="wrap">
+    <h1>Cek status permohonan</h1>
+    <p>Masukkan nomor registrasi dan email yang Anda gunakan saat mengajukan permohonan.</p>
+  </div>
+</section>
+<section class="bagian wrap" style="padding-top:36px;max-width:720px">
+  <form method="post" action="{{ url_for('status_permohonan') }}" class="baris">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div><label for="no_reg">Nomor registrasi</label><input id="no_reg" name="no_reg" required placeholder="PPID-2026-0001" value="{{ request.form.get('no_reg','') }}"></div>
+    <div><label for="email">Email</label><input id="email" name="email" type="email" required autocomplete="email"></div>
+    <div><button class="btn btn-padi" type="submit">Cek status</button></div>
+  </form>
+
+  {% if hasil %}
+  <div class="panel" style="margin-top:28px">
+    <h2>{{ hasil.no_reg }}</h2>
+    <dl class="info">
+      <dt>Status</dt><dd><span class="lencana lencana-{{ hasil.status|lower }}">{{ hasil.status }}</span></dd>
+      <dt>Diajukan</dt><dd>{{ hasil.created_at|tgl }}</dd>
+      <dt>Informasi yang diminta</dt><dd>{{ hasil.rincian }}</dd>
+      {% if hasil.catatan %}<dt>Catatan petugas</dt><dd>{{ hasil.catatan }}</dd>{% endif %}
+    </dl>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

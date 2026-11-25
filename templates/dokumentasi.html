@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Dokumentasi{% endblock %}
+{% block content %}
+<section class="halaman-judul">
+  <div class="wrap">
+    <h1>Dokumentasi</h1>
+    <p>Foto kegiatan pembinaan, pelatihan, dan kunjungan {{ site.nama }}.</p>
+  </div>
+</section>
+
+<section class="bagian wrap" style="padding-top:40px">
+  {% if foto %}
+  <div class="galeri">
+    {% for f in foto %}
+    <figure class="foto">
+      <a href="{{ url_for('media', nama=f.filename) }}" target="_blank" rel="noopener"><img src="{{ url_for('media', nama=f.filename) }}" alt="{{ f.judul }}" loading="lazy"></a>
+      <figcaption>
+        <strong>{{ f.judul }}</strong>
+        <span>{{ f.tanggal|tgl }}</span>
+        {% if f.keterangan %}<p class="kecil" style="margin:6px 0 0">{{ f.keterangan }}</p>{% endif %}
+      </figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="kosong"><strong>Belum ada foto kegiatan.</strong>Foto akan tampil di sini setelah petugas mengunggahnya.</div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Survei Kepuasan Masyarakat{% endblock %}
+{% block content %}
+<section class="halaman-judul">
+  <div class="wrap">
+    <h1>Survei Kepuasan Masyarakat</h1>
+    <p>Pendapat Anda membantu {{ site.nama }} memperbaiki layanan. Survei ini anonim dan hanya butuh sekitar 2 menit.</p>
+  </div>
+</section>
+
+<section class="bagian wrap" style="padding-top:36px">
+  <div class="form-grid">
+    <form method="post" action="{{ url_for('survei') }}" class="baris" novalidate>
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <div class="jebakan" aria-hidden="true"><label>Jangan diisi<input name="website" tabindex="-1" autocomplete="off"></label></div>
+
+      {% if galat %}
+      <div class="notif notif-galat" role="alert" style="margin:0">
+        <strong>Survei belum terkirim. Lengkapi hal berikut:</strong>
+        <ul style="margin:6px 0 0;padding-left:1.2em">{% for g in galat %}<li>{{ g }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+
+      <h2>1. Tentang Anda</h2>
+      <p class="bantu" style="margin:-8px 0 0">Nama dan identitas pribadi tidak diminta.</p>
+      <div class="baris baris-2">
+        {% for kolom, label, pilihan in PROFIL %}
+        <div><label for="{{ kolom }}">{{ label }} <span class="wajib">*</span></label>
+          <select id="{{ kolom }}" name="{{ kolom }}" required>
+            <option value="">Pilih</option>
+            {% for p in pilihan %}<option value="{{ p }}"{% if v.get(kolom) == p %} selected{% endif %}>{{ p }}</option>{% endfor %}
+          </select></div>
+        {% endfor %}
+      </div>
+
+      <h2 style="margin-top:12px">2. Penilaian layanan</h2>
+      <p class="bantu" style="margin:-8px 0 0">Pilih satu jawaban untuk setiap pertanyaan.</p>
+      {% for kode, judul, tanya, opsi in UNSUR %}
+      <fieldset class="unsur">
+        <legend><span class="no">{{ loop.index }}</span> {{ judul }}</legend>
+        <p class="tanya">{{ tanya }}</p>
+        <div class="pilihan">
+          {% for o in opsi %}
+          <label class="opsi"><input type="radio" name="{{ kode }}" value="{{ loop.index }}" required{% if v.get(kode) == (loop.index|string) %} checked{% endif %}><span>{{ o }}</span></label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% endfor %}
+
+      <h2 style="margin-top:12px">3. Saran dan masukan</h2>
+      <div><label for="saran">Saran untuk perbaikan layanan (opsional)</label>
+        <textarea id="saran" name="saran" maxlength="1000">{{ v.get('saran', '') }}</textarea></div>
+      <div><button class="btn btn-padi" type="submit">Kirim survei</button></div>
+    </form>
+
+    <aside class="baris" style="align-content:start">
+      <div class="panel qr-panel" style="margin:0">
+        <h3>Isi lewat HP</h3>
+        <img src="{{ url_for('survei_qr') }}" alt="Kode QR untuk membuka survei kepuasan masyarakat" width="220" height="220">
+        <p class="kecil" style="margin:0">Pindai kode QR dengan kamera HP untuk membuka survei ini.</p>
+      </div>
+      <div class="panel" style="margin:0">
+        <h3>Tentang survei</h3>
+        <p class="kecil" style="margin:0">Pertanyaan mengikuti 9 unsur survei kepuasan masyarakat dari Permenpan RB No. 14 Tahun 2017. Jawaban dipakai untuk menghitung Indeks Kepuasan Masyarakat dan bahan perbaikan layanan.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

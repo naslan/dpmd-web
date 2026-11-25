@@ -1,0 +1,10 @@
+<article class="kartu-berita">
+  <a class="kartu-gambar" href="{{ url_for('berita_detail', i=b.id) }}" tabindex="-1" aria-hidden="true">
+    {% if b.gambar %}<img src="{{ url_for('media', nama=b.gambar) }}" alt="" loading="lazy">{% else %}<div class="tanpa-gambar"></div>{% endif %}
+  </a>
+  <div class="kartu-isi">
+    <time datetime="{{ b.tanggal }}">{{ b.tanggal|tgl }}</time>
+    <h3><a href="{{ url_for('berita_detail', i=b.id) }}">{{ b.judul }}</a></h3>
+    <p>{{ b.isi|ringkas }}</p>
+  </div>
+</article>

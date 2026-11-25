@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Permohonan terkirim{% endblock %}
+{% block content %}
+<section class="bagian wrap" style="padding-top:56px;max-width:720px">
+  <h1>Permohonan terkirim</h1>
+  <p>Permohonan informasi Anda sudah kami terima. Simpan nomor registrasi ini untuk memeriksa perkembangannya:</p>
+  <p class="noreg">{{ no_reg }}</p>
+  <p>Untuk cek status, Anda memerlukan nomor registrasi dan alamat email yang Anda isikan pada formulir. Nomor ini hanya ditampilkan sekali.</p>
+  <div class="aksi">
+    <a class="btn btn-padi" href="{{ url_for('status_permohonan') }}">Cek status permohonan</a>
+    <a class="btn btn-padi" href="{{ url_for('ppid') }}" style="background:transparent;color:var(--padi);border-color:var(--padi)">Kembali ke PPID Pelaksana</a>
+  </div>
+</section>
+{% endblock %}

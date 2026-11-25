@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}PPID Pelaksana{% endblock %}
+{% block content %}
+<section class="halaman-judul">
+  <div class="wrap">
+    <h1>PPID Pelaksana</h1>
+    <p>Pejabat Pengelola Informasi dan Dokumentasi menyediakan informasi publik {{ site.nama }}. Semua dokumen dapat dilihat dan diunduh tanpa perlu masuk.</p>
+  </div>
+</section>
+
+<section class="bagian wrap" style="padding-top:32px">
+  <nav class="tab" aria-label="Kategori informasi">
+    <a href="{{ url_for('ppid', q=q or None, tahun=tahun or None) }}"{% if not kat %} class="aktif"{% endif %}>Semua<small>{{ total }}</small></a>
+    {% for kode, nama in KATEGORI.items() %}
+      <a href="{{ url_for('ppid', kategori=kode, q=q or None, tahun=tahun or None) }}"{% if kat == kode %} class="aktif"{% endif %}>{{ nama }}<small>{{ hitung.get(kode, 0) }}</small></a>
+    {% endfor %}
+  </nav>
+  {% if kat %}<p class="ketkategori">{{ KET[kat] }}</p>{% endif %}
+
+  <form class="filter" method="get" action="{{ url_for('ppid') }}" role="search">
+    {% if kat %}<input type="hidden" name="kategori" value="{{ kat }}">{% endif %}
+    <input type="search" name="q" value="{{ q }}" placeholder="Cari judul atau uraian dokumen" aria-label="Cari dokumen">
+    <select name="tahun" aria-label="Tahun" style="width:auto">
+      <option value="">Semua tahun</option>
+      {% for t in tahun_list %}<option value="{{ t }}"{% if tahun == t|string %} selected{% endif %}>{{ t }}</option>{% endfor %}
+    </select>
+    <button class="btn btn-padi" type="submit">Terapkan</button>
+  </form>
+
+  {% if dokumen %}
+  <div class="tabel-bungkus">
+    <table>
+      <thead><tr><th>Dokumen</th><th>Kategori</th><th>Tahun</th><th>Berkas</th></tr></thead>
+      <tbody>
+      {% for d in dokumen %}
+        <tr>
+          <td><span class="judul">{{ d.judul }}</span>{% if d.deskripsi %}<span class="ket">{{ d.deskripsi }}</span>{% endif %}</td>
+          <td><span class="lencana">{{ KATEGORI[d.kategori] }}</span></td>
+          <td>{{ d.tahun }}</td>
+          <td><a href="{{ url_for('unduh', doc_id=d.id) }}">Unduh<span class="ket">{{ d.original_name.rsplit('.',1)[-1]|upper }}, {{ d.ukuran|ukuran }}</span></a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="kosong">
+    <strong>{% if q or kat or tahun %}Tidak ada dokumen yang cocok.{% else %}Belum ada dokumen yang diterbitkan.{% endif %}</strong>
+    {% if q or kat or tahun %}Ubah kata kunci atau pilih <a href="{{ url_for('ppid') }}">semua kategori</a>.{% else %}Dokumen akan tampil di sini setelah petugas mengunggahnya.{% endif %}
+  </div>
+  {% endif %}
+</section>
+
+<section class="bagian wrap">
+  <div class="dua-kolom">
+    <div>
+      <h2>Cara meminta informasi</h2>
+      <p>Informasi yang belum tersedia di halaman ini dapat diminta langsung kepada PPID.</p>
+      <p class="aksi" style="margin:0 0 20px">
+        <a class="btn btn-padi" href="{{ url_for('permohonan') }}">Ajukan permohonan informasi</a>
+        <a class="btn btn-padi" href="{{ url_for('status_permohonan') }}" style="background:transparent;color:var(--padi);border-color:var(--padi)">Cek status</a>
+      </p>
+      <ol class="langkah">
+        <li><span>Isi data diri dan rincian informasi melalui <a href="{{ url_for('permohonan') }}">formulir permohonan informasi</a>, dengan menyebutkan informasi yang dibutuhkan dan tujuannya.</span></li>
+        <li><span>Petugas mencatat permohonan dan memberikan bukti penerimaan.</span></li>
+        <li><span>PPID memberi jawaban tertulis dalam waktu 10 hari kerja sejak permohonan diterima.</span></li>
+        <li><span>Jika tidak puas dengan jawaban, ajukan keberatan kepada atasan PPID.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h2>Kontak PPID</h2>
+      <p>Surel: {{ site.ppid_kontak }}<br>Telepon: {{ site.telepon }}<br>Alamat: {{ site.alamat }}</p>
+      <p class="kecil">Layanan: {{ site.jam }}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

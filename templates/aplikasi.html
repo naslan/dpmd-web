@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Aplikasi{% endblock %}
+{% block content %}
+<section class="halaman-judul">
+  <div class="wrap">
+    <h1>Aplikasi</h1>
+    <p>Aplikasi dan layanan daring yang mendukung pemerintah desa dan masyarakat.</p>
+  </div>
+</section>
+
+<section class="bagian wrap" style="padding-top:40px">
+  {% if apps %}
+  <div class="grid-app">
+    {% for a in apps %}
+    <article class="app">
+      <h3>{{ a.nama }}</h3>
+      <p>{{ a.deskripsi }}</p>
+      {% if a.url %}
+        <a class="btn btn-padi btn-kecil" href="{{ a.url }}" target="_blank" rel="noopener noreferrer">Buka aplikasi</a>
+      {% else %}
+        <span class="kecil">Tautan belum tersedia</span>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="kosong"><strong>Belum ada aplikasi terdaftar.</strong>Petugas dapat menambahkan aplikasi melalui halaman admin.</div>
+  {% endif %}
+</section>
+{% endblock %}
